@@ -1,0 +1,89 @@
+VpcCIDR: 10.0.0.0/16
+   VPC: cloud_rlty_vpc
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: !Ref 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref cloud_rlty_Ec2  
+
+PublicSubnet1CIDR:10.0.0.0/24
+  PublicSubnet: {cloud_rlty}-Public-subnet
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: !Select [ 0, !us.east.1 ]    # Get the first AZ in the list        
+      Tags:
+      - Key: Name
+        Value:sub ${cloud_rlty}-Public-subnet
+
+PrivateSubnet1CIDR:10.0.1.0/24
+  PrivateSubnet: {cloud_rlty}-Private-subnet
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [ 0, !us.east.1 ]    # Get the first AZ in the list        
+      Tags:
+      - Key: Name
+        Value:sub ${cloud_rlty}-Private-subnet
+
+    Type: AWS::EC2::cloud_rlty_IGW
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref cloud_rlty_IGW
+
+          NatGateway1:
+    Type: AWS::EC2::cloud_rlty_NGW 
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref {cloud_rlty}-Public-subnet
+      Tags:
+        - Key: Name
+          Value: !Ref cloud_rlty_NGW 
+
+      DefaultPublicRoute:{cloud_rlty}-Public-rt
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation: {cloud_rlty}_Public_Route_table
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref {cloud_rlty}_Public_Route_table
+      SubnetId: !Ref {cloud_rlty}_Public_subnet
+
+      DefaultPrivateRoute1: {cloud_rlty}_Private_Route_table
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref {cloud_rlty}_Private_Route_table
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
+
+  PrivateSubnet1RouteTableAssociation: {cloud_rlty}_Private_Route_table
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref {cloud_rlty}_Private_Route_table
+      SubnetId: !Ref PrivateSubnet1
+
+      AWS::EC2::SecurityGroupIngress
+Properties: 
+  CidrIp: String
+  CidrIpv6: String
+  Description: String
+  FromPort: Integer
+  GroupId: String
+  GroupName: String
+  IpProtocol: String
+  SourcePrefixListId: String
+  SourceSecurityGroupId: String
+  SourceSecurityGroupName: String
+  SourceSecurityGroupOwnerId: String
+  ToPort: Integer
