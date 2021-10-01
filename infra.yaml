@@ -73,17 +73,8 @@ PrivateSubnet1CIDR:10.0.1.0/24
       RouteTableId: !Ref {cloud_rlty}_Private_Route_table
       SubnetId: !Ref PrivateSubnet1
 
-      AWS::EC2::SecurityGroupIngress
-Properties: 
-  CidrIp: String
-  CidrIpv6: String
-  Description: String
-  FromPort: Integer
-  GroupId: String
-  GroupName: String
-  IpProtocol: String
-  SourcePrefixListId: String
-  SourceSecurityGroupId: String
-  SourceSecurityGroupName: String
-  SourceSecurityGroupOwnerId: String
-  ToPort: Integer
+ SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '1024'
+        CidrIp: !GetAtt 10.0.0.0/16
